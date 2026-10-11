@@ -2,58 +2,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAHLΞ X | Trading Platform</title>
-  <style>
-    body {
-      margin: 0;
-      background: #090909;
-      color: white;
-      font-family: Arial, sans-serif;
-      padding: 24px;
-    }
-    header { color: #d4af37; font-size: 28px; font-weight: bold; }
-    .card {
-      background: #171717;
-      border: 1px solid #333;
-      border-radius: 14px;
-      padding: 20px;
-      margin-top: 22px;
-    }
-    .status { color: #d4af37; font-weight: bold; }
-    button {
-      background: #d4af37;
-      border: 0;
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-weight: bold;
-      margin-top: 12px;
-    }
-    small { color: #aaa; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAHLΞ X | Client Portal</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#090909;color:#f5f5f5;font-family:Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:20px}
+.card{width:100%;max-width:430px;background:#141414;border:1px solid #b99445;border-radius:18px;padding:28px}
+.logo{color:#d7b45b;font-size:28px;font-weight:900;text-align:center;letter-spacing:2px}
+.sub{text-align:center;color:#aaa;margin:10px 0 25px}
+.tabs{display:flex;gap:10px;margin-bottom:20px}
+button{cursor:pointer}
+.tabs button{flex:1;padding:12px;background:#222;color:#eee;border:1px solid #444;border-radius:8px}
+.tabs button.selected,.primary{background:#c9a34c;color:#111;border-color:#c9a34c;font-weight:bold}
+label{display:block;margin:15px 0 7px;color:#ddd;font-size:14px}
+input{width:100%;padding:13px;background:#090909;border:1px solid #444;border-radius:8px;color:white;font-size:16px}
+.primary{width:100%;padding:14px;border:0;border-radius:8px;margin-top:20px;font-size:15px}
+#message{font-size:14px;line-height:1.5;margin-top:16px;overflow-wrap:anywhere}
+.small{text-align:center;color:#888;font-size:12px;margin-top:22px}
+</style>
 </head>
 <body>
-  <header>MAHLΞ X</header>
-  <p>TRADING CONTROL CENTER</p>
+<main class="card">
+  <div class="logo">MAHLΞ X</div>
+  <p class="sub">Trading Control Center</p>
 
-  <div class="card">
-    <h2>My Dashboard</h2>
-    <p>Robots: 01</p>
-    <p>Active licences: 00</p>
-    <p>Subscriptions: Manage your robots</p>
+  <div class="tabs">
+    <button id="loginTab" class="selected" type="button">Login</button>
+    <button id="signupTab" type="button">Create Account</button>
   </div>
 
-  <div class="card">
-    <h2>MONRY BANK V6+</h2>
-    <p class="status">LICENCE NOT ACTIVATED</p>
-    <small>Connect your MT5 account to get started.</small>
-    <br>
-    <button onclick="alert('Robot activation will be added in a later step.')">
-      Activate Robot
-    </button>
-  </div>
+  <form id="authForm">
+    <label for="email">Email address</label>
+    <input id="email" type="email" autocomplete="email" required>
 
-  <p><small>MAHLΞ X © 2026</small></p>
+    <label for="password">Password</label>
+    <input id="password" type="password" minlength="8"
+      autocomplete="current-password" required>
+
+    <button class="primary" id="submitBtn" type="submit">Login</button>
+  </form>
+
+  <button id="logoutBtn" class="primary" type="button" hidden>
+    Log Out
+  </button>
+
+  <div id="message" role="status" aria-live="polite"></div>
+  <p class="small">Secure client portal · MAHLΞ X</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const PROJECT_URL = "https://qzcbpaoaestwipmsmacb.supabase.co";
+const PUBLISHABLE_KEY = "sb_publishable_RQmPQMXuodWM52fmPAxLkQ_fldwbrYG";
+
+const client = window.supabase.createClient(
+  PROJECT_URL,
+  PUBLISHABLE_KEY
+);
+
+let mode = "login";
+
+const form = document.getElementById("authForm");
+const message = document.getElementById("message");
+const submitBtn = document.getElementById("submitBtn");
+const password = document.getElementById("password");
+const loginTab = document.getElementById("loginTab");
+const signupTab = document.getElementById("signupTab");
+const logoutBtn = document.getElementById("logoutBtn");
+
+function setMode(nextMode) {
+  mode = nextMode;
+  loginTab.classList.toggle("selected", mode === "login");
+  signupTab.classList.toggle("selected", mode === "signup");
+  submitBtn.textContent =
+    mode === "login" ? "Login" : "Create Account";
+  password.autocomplete =
+    mode === "login" ? "current-password" : "new-password";
+  message.textContent = "";
+}
+
+loginTab.addEventListener("click", () => setMode("login"));
+signupTab.addEventListener("click", () => setMode("signup"));
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  submitBtn.disabled = true;
+  message.textContent = "Please wait...";
+
+  const email = document.getElementById("email").value.trim();
+  const pass = password.value;
+
+  try {
+    if (mode === "signup") {
+      const { data, error } = await client.auth.signUp({
+        email: email,
+        password: pass
+      });
+      if (error) throw error;
+
+      message.textContent = data.session
+        ? "Account created! You are logged in."
+        : "Account created. Check your email for a confirmation link.";
+    } else {
+      const { error } = await client.auth.signInWithPassword({
+        email: email,
+        password: pass
+      });
+      if (error) throw error;
+      message.textContent = "Login successful!";
+    }
+  } catch (error) {
+    message.textContent = error.message;
+  } finally {
+    submitBtn.disabled = false;
+    updateSession();
+  }
+});
+
+logoutBtn.addEventListener("click", async () => {
+  const { error } = await client.auth.signOut();
+  message.textContent = error ? error.message : "You have logged out.";
+  updateSession();
+});
+
+async function updateSession() {
+  const { data } = await client.auth.getSession();
+  const loggedIn = !!data.session;
+  form.hidden = loggedIn;
+  logoutBtn.hidden = !loggedIn;
+  if (loggedIn) {
+    message.textContent = "Logged in as " + data.session.user.email;
+  }
+}
+
+client.auth.onAuthStateChange(() => {
+  updateSession();
+});
+
+updateSession();
+</script>
 </body>
 </html>
