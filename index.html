@@ -47,7 +47,20 @@ input{width:100%;padding:13px;background:#090909;border:1px solid #444;border-ra
     Log Out
   </button>
 
-  <div id="message" role="status" aria-live="polite"></div>
+    <div id="message" role="status" aria-live="polite"></div>
+<section id="activationSection" hidden>
+  <h2>MT5 Licence Activation</h2>
+  <p>Link your licence to your MT5 trading account.</p>
+  <form id="activationForm">
+    <label for="licenseKey">Licence Key</label>
+    <input id="licenseKey" type="text" placeholder="Enter your licence key" required>
+    <label for="mt5Login">MT5 Account Number</label>
+    <input id="mt5Login" type="text" inputmode="numeric" placeholder="Enter your MT5 login" required>
+    <button class="primary" id="activateBtn" type="submit">Activate Licence</button>
+  </form>
+  <p id="activationMessage" role="status"></p>
+</section>
+
 <section id="activationSection" hidden>
   <h2>MT5 Licence Activation</h2>
   <p>Link your licence to your MT5 trading account.</p>
