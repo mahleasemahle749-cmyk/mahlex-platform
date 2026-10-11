@@ -194,8 +194,8 @@ document.getElementById("activationForm").addEventListener("submit", async (even
 
   async function updateSession() {
   const { data } = await client.auth.getSession();
-      document.getElementById("activationSection").hidden = !loggedIn;const loggedIn = !!data.session;
-  form.hidden = loggedIn;
+          document.getElementById("activationSection").hidden = !loggedIn;const loggedIn = !!data.session;
+document.getElementById("activationSection").hidden = !loggedIn;form.hidden = loggedIn;
   logoutBtn.hidden = !loggedIn;
   if (loggedIn) {
     message.textContent = "Logged in as " + data.session.user.email;
