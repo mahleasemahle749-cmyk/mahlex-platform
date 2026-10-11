@@ -147,7 +147,39 @@ logoutBtn.addEventListener("click", async () => {
   updateSession();
 });
 
-async function updateSession() {
+document.getElementById("activationForm").addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const button = document.getElementById("activateBtn");
+  const message = document.getElementById("activationMessage");
+
+  button.disabled = true;
+  message.textContent = "Checking licence...";
+
+  try {
+    const { data, error } = await client.functions.invoke(
+      "smooth-processor",
+      {
+        body: {
+          license_key: document.getElementById("licenseKey").value.trim(),
+          mt5_login: document.getElementById("mt5Login").value.trim()
+        }
+      }
+    );
+
+    if (error) throw error;
+
+    message.textContent = data.valid
+      ? "Licence verified! MT5 account: " + data.mt5_login
+      : (data.error || "Licence could not be verified.");
+  } catch (error) {
+    message.textContent = "Verification failed. Check your login and function settings.";
+  } finally {
+    button.disabled = false;
+  }
+});
+
+  async function updateSession() {
   const { data } = await client.auth.getSession();
   const loggedIn = !!data.session;
   form.hidden = loggedIn;
